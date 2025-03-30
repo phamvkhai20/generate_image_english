@@ -13,10 +13,16 @@ export class VocabularyService {
   private unsplash;
 
   constructor() {
-    // Register fonts
-    registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Regular.ttf'), { family: 'Noto Sans' });
-    registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Bold.ttf'), { family: 'Noto Sans', weight: 'bold' });
-    registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Italic.ttf'), { family: 'Noto Sans', style: 'italic' });
+    try {
+      // Register fonts
+      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Regular.ttf'), { family: 'Noto Sans' });
+      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Bold.ttf'), { family: 'Noto Sans', weight: 'bold' });
+      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Italic.ttf'), { family: 'Noto Sans', style: 'italic' });
+      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoEmoji-Regular.ttf'), { family: 'Noto Emoji' });
+    } catch (error) {
+      console.error('Font registration error:', error);
+      // Fallback to system fonts if registration fails
+    }
 
     this.unsplash = createApi({
       accessKey: process.env.UNSPLASH_ACCESS_KEY,
@@ -25,7 +31,7 @@ export class VocabularyService {
   }
 
   async generateImage(createVocabularyDto: CreateVocabularyDto): Promise<Buffer> {
-    const { word, relatedPhrases } = createVocabularyDto;
+    const { word,emoji, relatedPhrases,meaning, ipa } = createVocabularyDto;
 
     // Get image from Unsplash
     const result = await this.unsplash.search.getPhotos({
@@ -75,11 +81,12 @@ export class VocabularyService {
     // Draw IPA
     ctx.font = 'italic 20px "Noto Sans"';
     ctx.fillStyle = '#4a5568';
-    ctx.fillText('/ˈlɪs.ən/', 220, 170);
+    ctx.fillText(ipa, 220, 170);
 
+    // Update the meaning text rendering
     // Draw meaning
-    ctx.font = '20px "Noto Sans"';
-    ctx.fillText('– (nghe) 🎧', 350, 170);
+    ctx.font = '20px "Noto Emoji", "Noto Sans"';
+    ctx.fillText(`– (${meaning}) ${emoji}`, 350, 170);
 
     // Draw phrases
     ctx.font = '18px "Noto Sans"';
