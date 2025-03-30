@@ -14,14 +14,13 @@ export class VocabularyService {
 
   constructor() {
     try {
-      // Register fonts
-      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Regular.ttf'), { family: 'Noto Sans' });
-      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Bold.ttf'), { family: 'Noto Sans', weight: 'bold' });
-      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Italic.ttf'), { family: 'Noto Sans', style: 'italic' });
-      registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoEmoji-Regular.ttf'), { family: 'Noto Emoji' });
+      // Register fonts with error handling
+      const fontPath = path.join(process.cwd(), 'src/assets/fonts');
+      registerFont(path.join(fontPath, 'NotoSans-Regular.ttf'), { family: 'Noto Sans' });
+      registerFont(path.join(fontPath, 'NotoSans-Bold.ttf'), { family: 'Noto Sans', weight: 'bold' });
+      registerFont(path.join(fontPath, 'NotoSans-Italic.ttf'), { family: 'Noto Sans', style: 'italic' });
     } catch (error) {
-      console.error('Font registration error:', error);
-      // Fallback to system fonts if registration fails
+      console.error('Font registration failed:', error);
     }
 
     this.unsplash = createApi({
@@ -83,10 +82,26 @@ export class VocabularyService {
     ctx.fillStyle = '#4a5568';
     ctx.fillText(ipa, 220, 170);
 
-    // Update the meaning text rendering
     // Draw meaning
-    ctx.font = '20px "Noto Emoji", "Noto Sans"';
-    ctx.fillText(`– (${meaning}) ${emoji}`, 350, 170);
+    ctx.font = '20px sans-serif';
+    const meaningText = `– (${meaning}) `;
+    ctx.fillText(meaningText, 350, 170);
+    
+    // Draw emoji directly
+    ctx.font = '24px sans-serif';
+    ctx.textBaseline = 'middle';
+    const meaningWidth = ctx.measureText(meaningText).width;
+    ctx.fillText(emoji, 350 + meaningWidth, 170);
+
+    // Reset font for remaining text
+    ctx.font = '18px "Noto Sans"';
+    ctx.textBaseline = 'alphabetic';
+
+    // Update other text renderings to use system font
+    ctx.font = 'bold 22px sans-serif';  // Header
+    ctx.font = 'bold 28px sans-serif';  // Main word
+    ctx.font = 'italic 20px sans-serif'; // IPA
+    ctx.font = '18px sans-serif';       // Phrases
 
     // Draw phrases
     ctx.font = '18px "Noto Sans"';
