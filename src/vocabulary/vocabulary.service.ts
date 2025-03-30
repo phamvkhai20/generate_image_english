@@ -1,4 +1,5 @@
 import * as nodeFetch from 'node-fetch';
+import * as path from 'path';
 
 import { createCanvas, loadImage } from 'canvas';
 
@@ -11,6 +12,7 @@ export class VocabularyService {
   private unsplash;
 
   constructor() {
+    // Use system fonts instead of trying to load from URL
     this.unsplash = createApi({
       accessKey: process.env.UNSPLASH_ACCESS_KEY,
       fetch: nodeFetch.default as any,
@@ -47,7 +49,7 @@ export class VocabularyService {
     ctx.fill();
 
     // Draw header text
-    ctx.font = 'bold 22px Arial';
+    ctx.font = 'bold 22px sans-serif';
     ctx.fillStyle = '#000000';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -60,22 +62,22 @@ export class VocabularyService {
     ctx.fill();
 
     // Draw main word
-    ctx.font = 'bold 28px Arial';
+    ctx.font = 'bold 28px sans-serif';
     ctx.fillStyle = '#1a365d';
     ctx.textAlign = 'left';
     ctx.fillText(word, 100, 170);
 
     // Draw IPA
-    ctx.font = 'italic 20px Arial';
+    ctx.font = 'italic 20px sans-serif';
     ctx.fillStyle = '#4a5568';
     ctx.fillText('/ˈlɪs.ən/', 220, 170);
 
     // Draw meaning
-    ctx.font = '20px Arial';
+    ctx.font = '20px sans-serif';
     ctx.fillText('– (nghe) 🎧', 350, 170);
 
     // Draw phrases
-    ctx.font = '18px Arial';
+    ctx.font = '18px sans-serif';
     relatedPhrases.forEach((phrase, index) => {
       const [eng, viet] = phrase.split(' – ');
       ctx.fillStyle = '#2d3748';
