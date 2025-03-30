@@ -8,16 +8,22 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "start:dev": "nest start --watch"
   },
   "devDependencies": {
     "@vercel/node": "^5.1.14"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.12",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.12",
     "@nestjs/platform-express": "^11.0.12",
+    "@types/node-fetch": "2.6.7",
+    "node-fetch": "2.6.7",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
-  }
+    "rxjs": "^7.8.2",
+    "unsplash-js": "^7.0.19"
+  },
+  "type": "commonjs"
 }
