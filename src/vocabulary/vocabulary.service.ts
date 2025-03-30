@@ -1,9 +1,9 @@
 import * as nodeFetch from 'node-fetch';
+import * as sharp from 'sharp';
 
 import { CreateVocabularyDto } from './dto/create-vocabulary.dto';
 import { Injectable } from '@nestjs/common';
 import { createApi } from 'unsplash-js';
-import sharp from 'sharp';
 
 @Injectable()
 export class VocabularyService {
@@ -147,9 +147,10 @@ export class VocabularyService {
       </svg>
     `;
 
-    return await sharp(Buffer.from(svg), {
-      failOnError: false,
-      density: 300
-    }).png().toBuffer();
+    // Update sharp usage
+    const sharpInstance = sharp(Buffer.from(svg));
+    return await sharpInstance
+      .png()
+      .toBuffer();
   }
 }
