@@ -6,13 +6,18 @@ import { createCanvas, loadImage } from 'canvas';
 import { CreateVocabularyDto } from './dto/create-vocabulary.dto';
 import { Injectable } from '@nestjs/common';
 import { createApi } from 'unsplash-js';
+import { registerFont } from 'canvas';
 
 @Injectable()
 export class VocabularyService {
   private unsplash;
 
   constructor() {
-    // Use system fonts instead of trying to load from URL
+    // Register fonts
+    registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Regular.ttf'), { family: 'Noto Sans' });
+    registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Bold.ttf'), { family: 'Noto Sans', weight: 'bold' });
+    registerFont(path.join(process.cwd(), 'src/assets/fonts/NotoSans-Italic.ttf'), { family: 'Noto Sans', style: 'italic' });
+
     this.unsplash = createApi({
       accessKey: process.env.UNSPLASH_ACCESS_KEY,
       fetch: nodeFetch.default as any,
@@ -49,7 +54,7 @@ export class VocabularyService {
     ctx.fill();
 
     // Draw header text
-    ctx.font = 'bold 22px sans-serif';
+    ctx.font = 'bold 22px "Noto Sans"';
     ctx.fillStyle = '#000000';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -62,22 +67,22 @@ export class VocabularyService {
     ctx.fill();
 
     // Draw main word
-    ctx.font = 'bold 28px sans-serif';
+    ctx.font = 'bold 28px "Noto Sans"';
     ctx.fillStyle = '#1a365d';
     ctx.textAlign = 'left';
     ctx.fillText(word, 100, 170);
 
     // Draw IPA
-    ctx.font = 'italic 20px sans-serif';
+    ctx.font = 'italic 20px "Noto Sans"';
     ctx.fillStyle = '#4a5568';
     ctx.fillText('/ˈlɪs.ən/', 220, 170);
 
     // Draw meaning
-    ctx.font = '20px sans-serif';
+    ctx.font = '20px "Noto Sans"';
     ctx.fillText('– (nghe) 🎧', 350, 170);
 
     // Draw phrases
-    ctx.font = '18px sans-serif';
+    ctx.font = '18px "Noto Sans"';
     relatedPhrases.forEach((phrase, index) => {
       const [eng, viet] = phrase.split(' – ');
       ctx.fillStyle = '#2d3748';
