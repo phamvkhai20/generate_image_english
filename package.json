@@ -6,7 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "vercel-build": "nest build"
+    "vercel-build": "nest build",
+    "build": "nest build",
+    "start:dev": "nest start --watch"
   },
   "devDependencies": {
     "@vercel/node": "^5.1.14"
@@ -20,6 +22,7 @@
     "node-fetch": "2.6.7",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "sharp": "0.32.6",
     "unsplash-js": "^7.0.19"
   },
   "type": "commonjs"
