@@ -80,12 +80,12 @@ export class VocabularyService {
     }
 
     // Create canvas with full width
-    const canvas = createCanvas(1200, 1500);
+    const canvas = createCanvas(1100, 1420);
     const ctx = canvas.getContext('2d');
 
     // Set terminal background
     ctx.fillStyle = 'transparent';
-    ctx.fillRect(0, 0, 1200, 1500);
+    ctx.fillRect(0, 0, 1100, 1420);
 
     // Draw main terminal window
     ctx.fillStyle = '#1E1E1E';
@@ -120,31 +120,32 @@ export class VocabularyService {
     });
 
     // Draw content with terminal-style text
-    ctx.fillStyle = '#98C379'; // Light green
-    ctx.font = '32px Menlo, Monaco, monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('Từ vựng tiếng Anh', 600, 100);
+    // ctx.fillStyle = '#98C379'; // Light green
+    // ctx.font = 'bold 32px Menlo, Monaco, monospace';
+    // ctx.textAlign = 'center';
+    // ctx.fillText('TỪ MỚI', 600, 110);
+    // ctx.textBaseline = 'alphabetic';
 
     // Draw main word section
     ctx.textAlign = 'left';
     ctx.fillStyle = '#61AFEF'; // Light blue
     ctx.font = 'bold 38px Menlo, Monaco, monospace';
-    ctx.fillText(word, 100, 170);
+    ctx.fillText(word, 100, 140);
 
     // Draw IPA
     ctx.fillStyle = '#ABB2BF'; // Light gray
     ctx.font = '30px Menlo, Monaco, monospace';
-    ctx.fillText(ipa, 320, 170);
+    ctx.fillText(ipa, 320, 140);
 
     // Draw meaning
     ctx.fillStyle = '#98C379'; // Light green
     ctx.font = '30px Menlo, Monaco, monospace';
     const meaningText = `– (${meaning}) `;
-    ctx.fillText(meaningText, 550, 170);
+    ctx.fillText(meaningText, 550, 140);
 
     // Draw phrases with terminal commands style
     ctx.font = '28px Menlo, Monaco, monospace';
-    let currentY = 250;
+    let currentY = 220;
     for (const phrase of relatedPhrases) {
       const [eng, viet] = phrase.split(' – ');
       ctx.fillStyle = '#C678DD'; // Purple for commands
@@ -155,10 +156,9 @@ export class VocabularyService {
     }
 
     // Draw image section with terminal frame
-    const imageY = 800;
+    const imageY = 700;
     try {
       const img = await loadImage(imageUrl);
-      const padding = 40;
       const maxWidth = 1020;
       const maxHeight = 600;
 
@@ -166,7 +166,7 @@ export class VocabularyService {
       const width = img.width * ratio;
       const height = img.height * ratio;
 
-      const x = 90 + (maxWidth - width) / 2;
+      const x = 70 + (maxWidth - width) / 2;
       const y = imageY + (maxHeight - height) / 2;
 
       // Add image container with gradient border
