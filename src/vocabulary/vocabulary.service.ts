@@ -16,9 +16,17 @@ export class VocabularyService {
     try {
       // Register fonts with error handling
       const fontPath = path.join(process.cwd(), 'src/assets/fonts');
-      registerFont(path.join(fontPath, 'NotoSans-Regular.ttf'), { family: 'Noto Sans' });
-      registerFont(path.join(fontPath, 'NotoSans-Bold.ttf'), { family: 'Noto Sans', weight: 'bold' });
-      registerFont(path.join(fontPath, 'NotoSans-Italic.ttf'), { family: 'Noto Sans', style: 'italic' });
+      registerFont(path.join(fontPath, 'NotoSans-Regular.ttf'), {
+        family: 'Noto Sans',
+      });
+      registerFont(path.join(fontPath, 'NotoSans-Bold.ttf'), {
+        family: 'Noto Sans',
+        weight: 'bold',
+      });
+      registerFont(path.join(fontPath, 'NotoSans-Italic.ttf'), {
+        family: 'Noto Sans',
+        style: 'italic',
+      });
     } catch (error) {
       console.error('Font registration failed:', error);
     }
@@ -31,18 +39,19 @@ export class VocabularyService {
 
   async generateImages(vocabularies: CreateVocabularyDto[]): Promise<Buffer[]> {
     const imageBuffers: Buffer[] = [];
-    
+
     for (const vocabulary of vocabularies) {
       const buffer = await this.generateSingleImage(vocabulary);
       imageBuffers.push(buffer);
     }
-    
+
     return imageBuffers;
   }
-
-  public async generateSingleImage(createVocabularyDto: CreateVocabularyDto): Promise<Buffer> {
+  public async generateSingleImage(
+    createVocabularyDto: CreateVocabularyDto,
+  ): Promise<Buffer> {
     const { word, emoji, relatedPhrases, meaning, ipa } = createVocabularyDto;
-    
+
     let imageUrl = '';
     try {
       // Get image from Unsplash
@@ -56,126 +65,141 @@ export class VocabularyService {
       imageUrl = result.response?.results[0]?.urls?.regular || '';
     } catch (error) {
       console.error('Unsplash API error:', error);
-      // Fallback to a placeholder image
       imageUrl = 'https://via.placeholder.com/600x300';
     }
 
-    // Create canvas
-    const canvas = createCanvas(800, 1000);
+    // Create canvas with full width
+    const canvas = createCanvas(1200, 1500);
     const ctx = canvas.getContext('2d');
 
-    // Set background
-    ctx.fillStyle = '#00CED1';
-    ctx.fillRect(0, 0, 800, 1000);
+    // Set terminal background
+    ctx.fillStyle = 'transparent';
+    ctx.fillRect(0, 0, 1200, 1500);
 
-    // Draw header box
-    ctx.fillStyle = 'white';
+    // Draw main terminal window
+    ctx.fillStyle = '#1E1E1E';
     ctx.beginPath();
-    ctx.roundRect(50, 30, 700, 60, 8);
+    ctx.roundRect(50, 30, 1100, 1420, 10);
     ctx.fill();
 
-    // Draw header text
-    ctx.font = 'bold 22px "Noto Sans"';
-    ctx.fillStyle = '#000000';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Từ vựng tiếng Anh', 400, 60);
-
-    // Draw main content box
-    ctx.fillStyle = 'white';
+    // Draw title bar
+    const gradient = ctx.createLinearGradient(50, 30, 50, 60);
+    gradient.addColorStop(0, '#3D3D3D');
+    gradient.addColorStop(1, '#2A2A2A');
+    ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.roundRect(50, 110, 700, 500, 10); // Reduced height for content box
+    ctx.roundRect(50, 30, 1100, 30, [10, 10, 0, 0]);
     ctx.fill();
 
-    // Draw main word
-    ctx.font = 'bold 28px "Noto Sans"';
-    ctx.fillStyle = '#1a365d';
-    ctx.textAlign = 'left';
-    ctx.fillText(word, 100, 170);
-
-    // Draw IPA
-    ctx.font = 'italic 20px "Noto Sans"';
-    ctx.fillStyle = '#4a5568';
-    ctx.fillText(ipa, 220, 170);
-
-    // Draw meaning
-    ctx.font = '20px sans-serif';
-    const meaningText = `– (${meaning}) `;
-    ctx.fillText(meaningText, 350, 170);
-    
-    // Draw emoji directly
-    ctx.font = '24px sans-serif';
-    ctx.textBaseline = 'middle';
-    const meaningWidth = ctx.measureText(meaningText).width;
-    ctx.fillText(emoji, 350 + meaningWidth, 170);
-
-    // Reset font for remaining text
-    ctx.font = '18px "Noto Sans"';
-    ctx.textBaseline = 'alphabetic';
-
-    // Update other text renderings to use system font
-    ctx.font = 'bold 22px sans-serif';  // Header
-    ctx.font = 'bold 28px sans-serif';  // Main word
-    ctx.font = 'italic 20px sans-serif'; // IPA
-    ctx.font = '18px sans-serif';       // Phrases
-
-    // Draw phrases
-    ctx.font = '18px "Noto Sans"';
-    const phraseEndY = relatedPhrases.reduce((y, phrase, index) => {
-      const [eng, viet] = phrase.split(' – ');
-      ctx.fillStyle = '#2d3748';
-      ctx.fillText(eng, 100, y + index * 60);
-      ctx.fillStyle = '#4a5568';
-      ctx.fillText(`– ${viet}`, 100, y + 25 + index * 60);
-      return y + index * 60;
-    }, 220);
-
-    // Draw related image directly without background box
-    // Draw terminal-like window for image
-    const imageY = 650;
-    
-    // Draw terminal header
-    ctx.fillStyle = '#E0E0E0';
-    ctx.beginPath();
-    ctx.roundRect(50, imageY, 700, 30, [10, 10, 0, 0]);
-    ctx.fill();
-
-    // Draw terminal buttons
+    // Draw terminal buttons with macOS style
     const buttonColors = ['#FF5F56', '#FFBD2E', '#27C93F'];
+    const buttonShadows = ['#E33E32', '#E09E1A', '#1AAB29'];
     buttonColors.forEach((color, i) => {
+      // Button shadow/border
+      ctx.fillStyle = buttonShadows[i];
+      ctx.beginPath();
+      ctx.arc(75 + i * 25, 45, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Button main color
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.arc(75 + (i * 25), imageY + 15, 6, 0, Math.PI * 2);
+      ctx.arc(75 + i * 25, 45, 6, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    // Draw terminal content area
-    ctx.fillStyle = '#1E1E1E';
-    ctx.beginPath();
-    ctx.roundRect(50, imageY + 30, 700, 270, [0, 0, 10, 10]);
-    ctx.fill();
+    // Draw content with terminal-style text
+    ctx.fillStyle = '#98C379'; // Light green
+    ctx.font = '32px Menlo, Monaco, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('Từ vựng tiếng Anh', 600, 100);
 
-    // Draw image in terminal window
+    // Draw main word section
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#61AFEF'; // Light blue
+    ctx.font = 'bold 38px Menlo, Monaco, monospace';
+    ctx.fillText(word, 100, 170);
+
+    // Draw IPA
+    ctx.fillStyle = '#ABB2BF'; // Light gray
+    ctx.font = '30px Menlo, Monaco, monospace';
+    ctx.fillText(ipa, 320, 170);
+
+    // Draw meaning
+    ctx.fillStyle = '#98C379'; // Light green
+    ctx.font = '30px Menlo, Monaco, monospace';
+    const meaningText = `– (${meaning}) `;
+    const meaningWidth = ctx.measureText(meaningText).width;
+    ctx.fillText(meaningText, 550, 170);
+
+    // Draw emoji
+    ctx.font = '34px sans-serif';
+    ctx.fillText(emoji, 550 + meaningWidth, 170);
+
+    // Draw phrases with terminal commands style
+    ctx.font = '28px Menlo, Monaco, monospace';
+    let currentY = 250;
+    for (const phrase of relatedPhrases) {
+      const [eng, viet] = phrase.split(' – ');
+      ctx.fillStyle = '#C678DD'; // Purple for commands
+      ctx.fillText(`$ ${eng}`, 100, currentY);
+      ctx.fillStyle = '#E5C07B'; // Soft yellow for output
+      ctx.fillText(`> ${viet}`, 100, currentY + 40);
+      currentY += 90;
+    }
+
+    // Draw image section with terminal frame
+    const imageY = 800;
     try {
       const img = await loadImage(imageUrl);
-      const padding = 20;
-      const maxWidth = 700 - (padding * 2);
-      const maxHeight = 270 - (padding * 2);
-      
-      // Calculate aspect ratio
+      const padding = 40;
+      const maxWidth = 1020;
+      const maxHeight = 600;
+
       const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
       const width = img.width * ratio;
       const height = img.height * ratio;
+
+      const x = 90 + (maxWidth - width) / 2;
+      const y = imageY + (maxHeight - height) / 2;
+
+      // Add image container with gradient border
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x - 15, y - 15, width + 30, height + 30, 10);
+      const borderGradient = ctx.createLinearGradient(x, y, x + width, y + height);
+      borderGradient.addColorStop(0, '#61AFEF');   // Blue
+      borderGradient.addColorStop(0.5, '#C678DD'); // Purple
+      borderGradient.addColorStop(1, '#98C379');   // Green
+      ctx.strokeStyle = borderGradient;
+      ctx.lineWidth = 3;
+      ctx.stroke();
       
-      // Center the image
-      const x = 50 + padding + (maxWidth - width) / 2;
-      const y = imageY + 30 + padding + (maxHeight - height) / 2;
-      
+      // Add subtle shadow
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
+      // Draw image with rounded corners
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, 8);
+      ctx.clip();
       ctx.drawImage(img, x, y, width, height);
+      ctx.restore();
+
+      // Add subtle overlay for better text contrast
+      ctx.fillStyle = 'rgba(30, 30, 30, 0.1)';
+      ctx.fillRect(x, y, width, height);
+
     } catch (error) {
       console.error('Image loading error:', error);
-      ctx.strokeStyle = '#4A4A4A';
-      ctx.strokeRect(70, imageY + 50, 660, 230);
+      // Fallback with styled placeholder
+      ctx.strokeStyle = '#3D3D3D';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(90, imageY, 1020, 600);
+      ctx.setLineDash([]);
     }
 
     return canvas.toBuffer('image/png');
