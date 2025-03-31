@@ -43,16 +43,21 @@ export class VocabularyService {
   public async generateSingleImage(createVocabularyDto: CreateVocabularyDto): Promise<Buffer> {
     const { word, emoji, relatedPhrases, meaning, ipa } = createVocabularyDto;
     
-    // Get image from Unsplash
-    const result = await this.unsplash.search.getPhotos({
-      query: word,
-      orientation: 'landscape',
-      perPage: 1,
-      contentFilter: 'high',
-    });
+    let imageUrl = '';
+    try {
+      // Get image from Unsplash
+      const result = await this.unsplash.search.getPhotos({
+        query: word,
+        orientation: 'landscape',
+        perPage: 1,
+        contentFilter: 'high',
+      });
 
-    if (!result.response) {
-      throw new Error('Failed to fetch image from Unsplash');
+      imageUrl = result.response?.results[0]?.urls?.regular || '';
+    } catch (error) {
+      console.error('Unsplash API error:', error);
+      // Fallback to a placeholder image
+      imageUrl = 'https://via.placeholder.com/600x300';
     }
 
     // Create canvas
@@ -79,7 +84,7 @@ export class VocabularyService {
     // Draw main content box
     ctx.fillStyle = 'white';
     ctx.beginPath();
-    ctx.roundRect(50, 110, 700, 840, 10);
+    ctx.roundRect(50, 110, 700, 500, 10); // Reduced height for content box
     ctx.fill();
 
     // Draw main word
@@ -116,19 +121,62 @@ export class VocabularyService {
 
     // Draw phrases
     ctx.font = '18px "Noto Sans"';
-    relatedPhrases.forEach((phrase, index) => {
+    const phraseEndY = relatedPhrases.reduce((y, phrase, index) => {
       const [eng, viet] = phrase.split(' – ');
       ctx.fillStyle = '#2d3748';
-      ctx.fillText(eng, 100, 220 + index * 60);
+      ctx.fillText(eng, 100, y + index * 60);
       ctx.fillStyle = '#4a5568';
-      ctx.fillText(`– ${viet}`, 100, 245 + index * 60);
+      ctx.fillText(`– ${viet}`, 100, y + 25 + index * 60);
+      return y + index * 60;
+    }, 220);
+
+    // Draw related image directly without background box
+    // Draw terminal-like window for image
+    const imageY = 650;
+    
+    // Draw terminal header
+    ctx.fillStyle = '#E0E0E0';
+    ctx.beginPath();
+    ctx.roundRect(50, imageY, 700, 30, [10, 10, 0, 0]);
+    ctx.fill();
+
+    // Draw terminal buttons
+    const buttonColors = ['#FF5F56', '#FFBD2E', '#27C93F'];
+    buttonColors.forEach((color, i) => {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(75 + (i * 25), imageY + 15, 6, 0, Math.PI * 2);
+      ctx.fill();
     });
 
-    // Draw related image
-    const imageUrl = result.response?.results[0]?.urls?.regular || '';
-    const img = await loadImage(imageUrl);
-    const imageY = 220 + relatedPhrases.length * 60 + 40;
-    ctx.drawImage(img, 100, imageY, 600, 300);
+    // Draw terminal content area
+    ctx.fillStyle = '#1E1E1E';
+    ctx.beginPath();
+    ctx.roundRect(50, imageY + 30, 700, 270, [0, 0, 10, 10]);
+    ctx.fill();
+
+    // Draw image in terminal window
+    try {
+      const img = await loadImage(imageUrl);
+      const padding = 20;
+      const maxWidth = 700 - (padding * 2);
+      const maxHeight = 270 - (padding * 2);
+      
+      // Calculate aspect ratio
+      const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
+      const width = img.width * ratio;
+      const height = img.height * ratio;
+      
+      // Center the image
+      const x = 50 + padding + (maxWidth - width) / 2;
+      const y = imageY + 30 + padding + (maxHeight - height) / 2;
+      
+      ctx.drawImage(img, x, y, width, height);
+    } catch (error) {
+      console.error('Image loading error:', error);
+      ctx.strokeStyle = '#4A4A4A';
+      ctx.strokeRect(70, imageY + 50, 660, 230);
+    }
 
     return canvas.toBuffer('image/png');
   }
