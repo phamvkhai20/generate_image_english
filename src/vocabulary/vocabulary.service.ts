@@ -56,13 +56,24 @@ export class VocabularyService {
     try {
       // Get image from Unsplash
       const result = await this.unsplash.search.getPhotos({
-        query: word,
+        query: word.replace(/[^\w\s]/g, ''), // Remove special characters for better search
         orientation: 'landscape',
         perPage: 1,
         contentFilter: 'high',
       });
 
       imageUrl = result.response?.results[0]?.urls?.regular || '';
+      
+      // If no image found and emoji exists, try searching with emoji description
+      if (!imageUrl && emoji) {
+        const emojiResult = await this.unsplash.search.getPhotos({
+          query: word,
+          orientation: 'landscape',
+          perPage: 1,
+          contentFilter: 'high',
+        });
+        imageUrl = emojiResult.response?.results[0]?.urls?.regular || '';
+      }
     } catch (error) {
       console.error('Unsplash API error:', error);
       imageUrl = 'https://via.placeholder.com/600x300';
@@ -129,12 +140,7 @@ export class VocabularyService {
     ctx.fillStyle = '#98C379'; // Light green
     ctx.font = '30px Menlo, Monaco, monospace';
     const meaningText = `– (${meaning}) `;
-    const meaningWidth = ctx.measureText(meaningText).width;
     ctx.fillText(meaningText, 550, 170);
-
-    // Draw emoji
-    ctx.font = '34px sans-serif';
-    ctx.fillText(emoji, 550 + meaningWidth, 170);
 
     // Draw phrases with terminal commands style
     ctx.font = '28px Menlo, Monaco, monospace';
