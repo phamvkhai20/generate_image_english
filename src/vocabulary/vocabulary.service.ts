@@ -63,7 +63,7 @@ export class VocabularyService {
       });
 
       imageUrl = result.response?.results[0]?.urls?.regular || '';
-      
+
       // If no image found and emoji exists, try searching with emoji description
       if (!imageUrl && emoji) {
         const emojiResult = await this.unsplash.search.getPhotos({
@@ -90,32 +90,32 @@ export class VocabularyService {
     // Draw main terminal window
     ctx.fillStyle = '#1E1E1E';
     ctx.beginPath();
-    ctx.roundRect(50, 30, 1100, 1420, 10);
+    ctx.roundRect(0, 0, 1100, 1420, 10);
     ctx.fill();
 
     // Draw title bar
-    const gradient = ctx.createLinearGradient(50, 30, 50, 60);
+    const gradient = ctx.createLinearGradient(0, 0, 0, 30);
     gradient.addColorStop(0, '#3D3D3D');
     gradient.addColorStop(1, '#2A2A2A');
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.roundRect(50, 30, 1100, 30, [10, 10, 0, 0]);
+    ctx.roundRect(0, 0, 1100, 30, [10, 10, 0, 0]);
     ctx.fill();
 
-    // Draw terminal buttons with macOS style
+    // Draw terminal buttons with macOS style (adjusted position)
     const buttonColors = ['#FF5F56', '#FFBD2E', '#27C93F'];
     const buttonShadows = ['#E33E32', '#E09E1A', '#1AAB29'];
     buttonColors.forEach((color, i) => {
       // Button shadow/border
       ctx.fillStyle = buttonShadows[i];
       ctx.beginPath();
-      ctx.arc(75 + i * 25, 45, 7, 0, Math.PI * 2);
+      ctx.arc(25 + i * 25, 15, 7, 0, Math.PI * 2);
       ctx.fill();
 
       // Button main color
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.arc(75 + i * 25, 45, 6, 0, Math.PI * 2);
+      ctx.arc(25 + i * 25, 15, 6, 0, Math.PI * 2);
       ctx.fill();
     });
 
@@ -130,18 +130,18 @@ export class VocabularyService {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#61AFEF'; // Light blue
     ctx.font = 'bold 38px Menlo, Monaco, monospace';
-    ctx.fillText(word, 100, 140);
+    ctx.fillText(word, 50, 140);
 
     // Draw IPA
     ctx.fillStyle = '#ABB2BF'; // Light gray
     ctx.font = '30px Menlo, Monaco, monospace';
-    ctx.fillText(ipa, 320, 140);
+    ctx.fillText(ipa, 270, 140);
 
     // Draw meaning
     ctx.fillStyle = '#98C379'; // Light green
     ctx.font = '30px Menlo, Monaco, monospace';
     const meaningText = `– (${meaning}) `;
-    ctx.fillText(meaningText, 550, 140);
+    ctx.fillText(meaningText, 500, 140);
 
     // Draw phrases with terminal commands style
     ctx.font = '28px Menlo, Monaco, monospace';
@@ -149,9 +149,9 @@ export class VocabularyService {
     for (const phrase of relatedPhrases) {
       const [eng, viet] = phrase.split(' – ');
       ctx.fillStyle = '#C678DD'; // Purple for commands
-      ctx.fillText(`$ ${eng}`, 100, currentY);
+      ctx.fillText(`$ ${eng}`, 50, currentY);
       ctx.fillStyle = '#E5C07B'; // Soft yellow for output
-      ctx.fillText(`> ${viet}`, 100, currentY + 40);
+      ctx.fillText(`> ${viet}`, 50, currentY + 40);
       currentY += 90;
     }
 
@@ -159,28 +159,33 @@ export class VocabularyService {
     const imageY = 700;
     try {
       const img = await loadImage(imageUrl);
-      const maxWidth = 1020;
+      const maxWidth = 1000; // Adjusted width
       const maxHeight = 600;
 
       const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
       const width = img.width * ratio;
       const height = img.height * ratio;
 
-      const x = 70 + (maxWidth - width) / 2;
+      const x = (1100 - width) / 2; // Center horizontally
       const y = imageY + (maxHeight - height) / 2;
 
       // Add image container with gradient border
       ctx.save();
       ctx.beginPath();
       ctx.roundRect(x - 15, y - 15, width + 30, height + 30, 10);
-      const borderGradient = ctx.createLinearGradient(x, y, x + width, y + height);
-      borderGradient.addColorStop(0, '#61AFEF');   // Blue
+      const borderGradient = ctx.createLinearGradient(
+        x,
+        y,
+        x + width,
+        y + height,
+      );
+      borderGradient.addColorStop(0, '#61AFEF'); // Blue
       borderGradient.addColorStop(0.5, '#C678DD'); // Purple
-      borderGradient.addColorStop(1, '#98C379');   // Green
+      borderGradient.addColorStop(1, '#98C379'); // Green
       ctx.strokeStyle = borderGradient;
       ctx.lineWidth = 3;
       ctx.stroke();
-      
+
       // Add subtle shadow
       ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
       ctx.shadowBlur = 15;
@@ -197,7 +202,6 @@ export class VocabularyService {
       // Add subtle overlay for better text contrast
       ctx.fillStyle = 'rgba(30, 30, 30, 0.1)';
       ctx.fillRect(x, y, width, height);
-
     } catch (error) {
       console.error('Image loading error:', error);
       // Fallback with styled placeholder
