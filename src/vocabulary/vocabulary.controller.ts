@@ -12,8 +12,7 @@ export class VocabularyController {
     @Body() createVocabularyDto: CreateVocabularyDto,
     @Res() res: Response,
   ) {
-    const buffer =
-      await this.vocabularyService.generateImage(createVocabularyDto);
+    const buffer = await this.vocabularyService.generateSingleImage(createVocabularyDto);
 
     res.set({
       'Content-Type': 'image/png',
@@ -21,5 +20,10 @@ export class VocabularyController {
     });
 
     res.send(buffer);
+  }
+
+  @Post('generate-images')
+  async generateImages(@Body() vocabularies: CreateVocabularyDto[]): Promise<Buffer[]> {
+    return this.vocabularyService.generateImages(vocabularies);
   }
 }

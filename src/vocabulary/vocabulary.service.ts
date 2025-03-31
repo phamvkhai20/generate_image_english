@@ -29,9 +29,20 @@ export class VocabularyService {
     });
   }
 
-  async generateImage(createVocabularyDto: CreateVocabularyDto): Promise<Buffer> {
-    const { word,emoji, relatedPhrases,meaning, ipa } = createVocabularyDto;
+  async generateImages(vocabularies: CreateVocabularyDto[]): Promise<Buffer[]> {
+    const imageBuffers: Buffer[] = [];
+    
+    for (const vocabulary of vocabularies) {
+      const buffer = await this.generateSingleImage(vocabulary);
+      imageBuffers.push(buffer);
+    }
+    
+    return imageBuffers;
+  }
 
+  public async generateSingleImage(createVocabularyDto: CreateVocabularyDto): Promise<Buffer> {
+    const { word, emoji, relatedPhrases, meaning, ipa } = createVocabularyDto;
+    
     // Get image from Unsplash
     const result = await this.unsplash.search.getPhotos({
       query: word,

@@ -8,7 +8,8 @@
   "scripts": {
     "vercel-build": "yarn global add @nestjs/cli && nest build",
     "build": "nest build",
-    "start:dev": "nest start --watch"
+    "start:dev": "nest start --watch",
+    "start": "nest start"
   },
   "devDependencies": {
     "@vercel/node": "^5.1.14"
