@@ -5,12 +5,13 @@ import { createCanvas, loadImage } from 'canvas';
 
 import { CreateVocabularyDto } from './dto/create-vocabulary.dto';
 import { Injectable } from '@nestjs/common';
-import { createApi } from 'unsplash-js';
 import { registerFont } from 'canvas';
+import axios from 'axios';
 
 @Injectable()
 export class VocabularyService {
-  private unsplash;
+  private readonly pixabayApiKey = process.env.PIXABAY_ACCESS_KEY;
+  private readonly pixabayBaseUrl = 'https://pixabay.com/api/';
 
   constructor() {
     try {
@@ -30,11 +31,6 @@ export class VocabularyService {
     } catch (error) {
       console.error('Font registration failed:', error);
     }
-
-    this.unsplash = createApi({
-      accessKey: process.env.UNSPLASH_ACCESS_KEY,
-      fetch: nodeFetch.default as any,
-    });
   }
 
   async generateImages(vocabularies: CreateVocabularyDto[]): Promise<Buffer[]> {
@@ -142,24 +138,32 @@ export class VocabularyService {
     const startY = 800;
 
     try {
-      // Get images from Unsplash
-      const result = await this.unsplash.search.getPhotos({
-        query: word.replace(/[^\w\s]/g, ''),
-        orientation: 'squarish',
-        perPage: 4,
-        contentFilter: 'high',
+      // Get images from Pixabay
+      const response = await axios.get(this.pixabayBaseUrl, {
+        params: {
+          key: this.pixabayApiKey,
+          q: encodeURIComponent(word.replace(/[^\w\s]/g, '')),
+          image_type: 'photo',
+          per_page: 4,
+          orientation: 'horizontal',
+          safesearch: true
+        }
       });
 
-      photos = result.response?.results || [];
-  
+      photos = response.data.hits || [];
+
       if (photos.length === 0 && emoji) {
-        const emojiResult = await this.unsplash.search.getPhotos({
-          query: word,
-          orientation: 'squarish',
-          perPage: 4,
-          contentFilter: 'high',
+        const emojiResponse = await axios.get(this.pixabayBaseUrl, {
+          params: {
+            key: this.pixabayApiKey,
+            q: encodeURIComponent(word),
+            image_type: 'photo',
+            per_page: 4,
+            orientation: 'horizontal',
+            safesearch: true
+          }
         });
-        photos = emojiResult.response?.results || [];
+        photos = emojiResponse.data.hits || [];
       }
 
       // Draw container border first
@@ -187,7 +191,7 @@ export class VocabularyService {
 
       // Draw images in horizontal row
       for (let i = 0; i < Math.min(photos.length, 4); i++) {
-        const img = await loadImage(photos[i].urls.regular);
+        const img = await loadImage(photos[i].largeImageURL);
         const x = startX + i * (gridSize + gap);
         const y = startY;
 
