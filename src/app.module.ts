@@ -1,9 +1,10 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from './config/typeorm.config';
 import { TemplateModule } from './template/template.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { VocabularyModule } from './vocabulary/vocabulary.module';
+import { typeOrmConfig } from './config/typeorm.config';
 
 @Module({
   imports: [
