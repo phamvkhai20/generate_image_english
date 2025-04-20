@@ -32,14 +32,13 @@ export class VocabularyController {
   ) {
     const buffers = await this.vocabularyService.generateImages(vocabularies);
     
-    // Combine all buffers into a single buffer
-    const combinedBuffer = Buffer.concat(buffers);
+    // Convert buffers to base64 strings
+    const images = buffers.map((buffer, index) => ({
+      id: index + 1,
+      data: `data:image/png;base64,${buffer.toString('base64')}`
+    }));
 
-    res.set({
-      'Content-Type': 'image/png',
-      'Content-Length': combinedBuffer.length,
-    });
-    res.end(combinedBuffer);
+    res.json({ images });
   }
 
   @Post('generate-template')
