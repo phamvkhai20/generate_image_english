@@ -49,6 +49,7 @@ export class VocabularyService {
 
     return imageBuffers;
   }
+
   public async generateSingleImage(
     createVocabularyDto: CreateVocabularyDto,
   ): Promise<Buffer> {
