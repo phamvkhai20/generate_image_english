@@ -5,20 +5,25 @@ import { NestFactory } from '@nestjs/core';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  // Enable CORS
-  app.enableCors({
-    origin: ['http://localhost:3000'], // Add your frontend URL
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
-
+  
+  // Cấu hình Swagger
   const config = new DocumentBuilder()
-    .setTitle('Image Generator API')
-    .setDescription('The Image Generator API description')
+    .setTitle('API Documentation')
+    .setDescription('API documentation for your application')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'access-token', // Đây là tên của security scheme, sẽ được sử dụng trong các decorator
+    )
     .build();
-
+  
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 

@@ -1,22 +1,40 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { ChatController } from './chat/chat.controller';
+import { ChatModule } from './chat/chat.module';
 import { Module } from '@nestjs/common';
 import { TemplateModule } from './template/template.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserInterceptor } from './auth/user.interceptor';
+import { UsersModule } from './users/users.module';
 import { VocabularyModule } from './vocabulary/vocabulary.module';
 import { typeOrmConfig } from './config/typeorm.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService) => typeOrmConfig(configService),
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) =>
+        typeOrmConfig(configService),
       inject: [ConfigService],
     }),
     TemplateModule,
     VocabularyModule,
+    AuthModule,
+    ChatModule,
+    UsersModule,
+  ],
+  controllers: [AppController, ChatController],
+  providers: [
+    AppService,
+    {
+      provide: 'APP_INTERCEPTOR',
+      useClass: UserInterceptor,
+    },
   ],
 })
 export class AppModule {}
