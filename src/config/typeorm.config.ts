@@ -1,6 +1,11 @@
+import { ApiKey } from '../users/entities/api-key.entity';
 import { ConfigService } from '@nestjs/config';
+import { Content } from '../content/entities/content.entity';
+import { Credit } from '../credits/entities/credit.entity';
+import { Sentence } from 'src/content/entities/sentence.entity';
 import { Template } from '../entities/template.entity';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
 
 const certContents = `-----BEGIN CERTIFICATE-----
 MIIETTCCArWgAwIBAgIUG2V6Td9UvO3KippfOS5EK2rAu4gwDQYJKoZIhvcNAQEM
@@ -40,7 +45,14 @@ export const typeOrmConfig = (
   username: configService.get('DB_USERNAME'),
   password: configService.get('DB_PASSWORD'),
   database: configService.get('DB_DATABASE'),
-  entities: [Template],
+  entities: [
+    User,           // Đặt User lên đầu tiên vì các bảng khác phụ thuộc vào nó
+    ApiKey,
+    Template, 
+    Content, 
+    Sentence, 
+    Credit
+  ],
   logging: configService.get('DB_LOGGING'),
   synchronize: true,
   dropSchema: false,

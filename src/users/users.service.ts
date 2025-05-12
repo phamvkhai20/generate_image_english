@@ -1,40 +1,50 @@
 import * as bcrypt from 'bcrypt';
 
-import { ApiKey } from './api-key.model';
 import { Injectable } from '@nestjs/common';
-import { User } from './user.model';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { ApiKey } from './entities/api-key.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  private readonly users: User[] = [];
-  private readonly apiKeys: ApiKey[] = [];
-  private idCounter = 1;
-  private apiKeyIdCounter = 1;
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(ApiKey)
+    private apiKeyRepository: Repository<ApiKey>,
+  ) {}
 
   async findOne(username: string): Promise<User | undefined> {
-    return this.users.find(user => user.username === username);
+    return this.userRepository.findOne({ where: { username } });
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.users.find(user => user.email === email);
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  async create(username: string, email: string, password: string): Promise<User> {
+  async findById(id: number): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { id } });
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const { username, email, password } = createUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const newUser: User = {
-      id: this.idCounter++,
+    const newUser = this.userRepository.create({
       username,
       email,
       password: hashedPassword,
-    };
+    });
     
-    this.users.push(newUser);
-    return newUser;
+    return this.userRepository.save(newUser);
   }
 
   async findApiKeyByUserId(userId: number, service: string): Promise<ApiKey | undefined> {
-    return this.apiKeys.find(apiKey => apiKey.userId === userId && apiKey.service === service);
+    return this.apiKeyRepository.findOne({ 
+      where: { userId, service } 
+    });
   }
 
   async saveApiKey(userId: number, service: string, key: string): Promise<ApiKey> {
@@ -44,32 +54,30 @@ export class UsersService {
     if (existingApiKey) {
       // Cập nhật API key hiện có
       existingApiKey.key = key;
-      existingApiKey.updatedAt = new Date();
-      return existingApiKey;
+      return this.apiKeyRepository.save(existingApiKey);
     } else {
       // Tạo API key mới
-      const newApiKey: ApiKey = {
-        id: this.apiKeyIdCounter++,
+      const newApiKey = this.apiKeyRepository.create({
         userId,
         service,
         key,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      });
       
-      this.apiKeys.push(newApiKey);
-      return newApiKey;
+      return this.apiKeyRepository.save(newApiKey);
     }
   }
 
   async deleteApiKey(userId: number, service: string): Promise<boolean> {
-    const index = this.apiKeys.findIndex(apiKey => apiKey.userId === userId && apiKey.service === service);
-    
-    if (index !== -1) {
-      this.apiKeys.splice(index, 1);
-      return true;
+    const result = await this.apiKeyRepository.delete({ userId, service });
+    return result.affected > 0;
+  }
+
+  async updateRole(userId: number, role: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('Người dùng không tồn tại');
     }
     
-    return false;
+    return this.userRepository.save(user);
   }
 }
